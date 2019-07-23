@@ -1,0 +1,5 @@
+2019-07-20 13:45:17.6881 INFO Returned all owners from database.
+2019-07-20 13:45:29.5183 INFO Returned all owners from database.
+2019-07-20 13:55:15.9607 INFO Returned all owners from database.
+2019-07-20 14:11:02.4976 INFO Returned owner with id: 24fd81f8-d58a-4bcc-9f35-dc6cd5641906
+2019-07-20 14:11:12.1197 ERROR Owner with id: 24fd81f8-d58a-4bcc-9f35-dc6cd5641907, hasn't been found in db.
