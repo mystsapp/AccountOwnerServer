@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Contracts;
+using Entities.Extensions;
+using Entities.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,13 +39,13 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "OwnerById")]
         public IActionResult GetOwnerById(Guid id)
         {
             try
             {
                 var owner = _repository.Owner.GetOwnerById(id);
-                if(owner.Id.Equals(Guid.Empty)) // Or if(owner.IsEmptyObject())
+                if(owner.IsEmpltyObject()) // Or if(owner.IsEmptyObject())
                 {
                     _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
                     return NotFound();
@@ -57,6 +59,126 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Something went wrong inside GetOwnerById action: {ex.Message}");
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+        [HttpGet("{id}/account")]
+        public IActionResult GetOwnerWithDetails(Guid id)
+        {
+            try
+            {
+                var owner = _repository.Owner.GetOwnerWithDetails(id);
+                if (owner.IsEmpltyObject())
+                {
+                    _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
+                    return NotFound();
+                }
+                else
+                {
+                    _logger.LogInfo($"Returned owner with details for id: {id}");
+                    return Ok(owner);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong inside GetOwnerWithDetails action: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+
+        }
+
+        [HttpPost]
+        public IActionResult CreateOwner([FromBody]Owner owner)
+        {
+            try
+            {
+                if(owner.IsObjectNull())
+                {
+                    _logger.LogError("Owner object sent form client is null.");
+                    return BadRequest("Object is null");
+                }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Invalid owner object sent from client.");
+                    return BadRequest("Invalid model object");
+                }
+
+                _repository.Owner.CreateOwner(owner);
+                _repository.Save(); 
+
+                return CreatedAtRoute("OwnerById", new { id = owner.Id }, owner);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong inside CreateOwner action: {ex.Message}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateOwner(Guid id, [FromBody]Owner owner)
+        {
+            try
+            {
+                if (owner.IsObjectNull())
+                {
+                    _logger.LogError("Owner object sent from client is null.");
+                    return BadRequest("Owner object is null");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Invalid owner object sent from client.");
+                    return BadRequest("Invalid model object.");
+                }
+
+                var dbOwner = _repository.Owner.GetOwnerById(id);
+
+                if (dbOwner.IsEmpltyObject())
+                {
+                    _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
+                    return NotFound();
+                }
+
+                _repository.Owner.UpdateOwner(dbOwner, owner);
+                _repository.Save();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteOwner(Guid id)
+        {
+            var owner = _repository.Owner.GetOwnerById(id);
+            try
+            {
+                if (owner.IsEmpltyObject())
+                {
+                    _logger.LogError($"Owner with id: {id}, hasn't been found in db.");
+                    return NotFound();
+                }
+
+                if (_repository.Account.AccountsByOwner(id).Any())
+                {
+                    _logger.LogError($"Cannot delete with id: {id}. It has related accounts. Delete those accounts first.");
+                    return BadRequest("Cannot delete owner. It has related accounts. Delete those accounts first.");
+                }
+
+                _repository.Owner.DeleteOwner(owner);
+                _repository.Save();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong inside DeleteOwner action: {ex.Message}");
                 return StatusCode(500, "Internal server error.");
             }
         }

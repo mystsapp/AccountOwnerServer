@@ -1,0 +1,5 @@
+2019-07-23 10:34:47.8211 INFO Returned owner with id: 24fd81f8-d58a-4bcc-9f35-dc6cd5641906
+2019-07-23 10:34:56.2072 INFO Returned owner with details for id: 24fd81f8-d58a-4bcc-9f35-dc6cd5641906
+2019-07-23 10:36:43.1605 ERROR Owner with id: 24fd81f8-d58a-4bcc-9f35-dc6cd5641907, hasn't been found in db.
+2019-07-23 10:51:25.8989 INFO Returned owner with id: 24fd81f8-d58a-4bcc-9f35-dc6cd5641906
+2019-07-23 16:21:39.9133 ERROR Cannot delete with id: f98e4d74-0f68-4aac-89fd-047f1aaca6b6. It has related accounts. Delete those accounts first.
